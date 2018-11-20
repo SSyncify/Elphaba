@@ -6,16 +6,7 @@ app = Flask(__name__, static_folder='.')
 socketio = SocketIO(app)
 
 
-# AUTHENTICATION ROUTES
-@app.route('/login')
-def login_to_spotify():
-    '''
-    GET REQUEST
-    no params or headers, redirects to spotify log in page
-    '''
-    return authentication_controllers.login_to_spotify()
-
-
+# ACCOUNTS ROUTES
 @app.route('/username')
 def get_username():
     '''

@@ -15,18 +15,6 @@ REDIRECT_URI = 'http://127.0.0.1:5002/callback/user_page'
 SPOTIFY_USER_INFO = 'https://api.spotify.com/v1/me'
 
 
-scopes = ["user-read-playback-state%20", "user-read-currently-playing%20", "user-modify-playback-state%20",
-          "app-remote-control%20", "streaming%20", "playlist-read-collaborative%20", "playlist-modify-private%20",
-          "playlist-modify-public%20","playlist-read-private%20", "user-read-birthdate%20", "user-read-email%20",
-          "user-read-private%20", "user-library-read%20", "user-library-modify"]
-
-
-#probably don't need this endpoint in this API should make front end do this
-def login_to_spotify():
-    return redirect(SPOTIFY_AUTHORIZATION_URL + "/?client_id=" + CLIENT_ID +
-                    "&response_type=code&redirect_uri=" + REDIRECT_URI + "&scope=" + "".join(scopes))
-
-
 def get_tokens_from_spotify():
     auth_token = request.args['code']
     code_payload = {
