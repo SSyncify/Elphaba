@@ -34,8 +34,8 @@ def store_user_tokens():
     return authentication_controllers.store_tokens()
 
 
-@app.route('/get_stored_tokens')
-def get_stored_user_tokens():
+@app.route('/get_stored_info')
+def get_stored_user_info():
     '''
     GET REQUEST
     requires username parameter, retrieves stored user tokens and returns to caller
