@@ -13,6 +13,7 @@ SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token"
 SPOTIFY_AUTHORIZATION_URL = "https://accounts.spotify.com/authorize"
 REDIRECT_URI = 'http://127.0.0.1:3000/callback/redirect'
 SPOTIFY_USER_INFO = 'https://api.spotify.com/v1/me'
+DEFAULT_IMAGE_URL = "https://pngimage.net/wp-content/uploads/2018/05/default-user-png-1.png"
 
 
 def get_tokens_from_spotify():
@@ -33,7 +34,11 @@ def get_user_info_from_spotify():
     access_token = request.args['access_token']
     headers = {"Authorization": "Bearer {}".format(access_token)}
     response = api_request.get(SPOTIFY_USER_INFO, headers=headers).json()
-    return jsonify(images=response['images'], email=response['email'], display_name=response['display_name'], country=response['country'],
+    if len(response["images"]) > 0:
+        img = response["images"][0]['url']
+    else:
+        img = DEFAULT_IMAGE_URL
+    return jsonify(images=img, email=response['email'], display_name=response['display_name'], country=response['country'],
                    id=response['id'])
 
 
@@ -43,6 +48,7 @@ def store_tokens():
     refresh_token = request.args['refresh_token']
     expires_in = request.args['expiry_time']
     images = request.args['images']
+    display_name = request.args['display_name']
     with open('./user_data/user_data.json', 'r') as data_file:
         try:
             user_data = json.load(data_file)
@@ -52,7 +58,7 @@ def store_tokens():
     if len(user_data) > 5:
         user_data.pop(user_data.keys[0])
 
-    user_data[username] = {"images": images, "access_token": access_token, "refresh_token": refresh_token, "expires": (datetime.now() + timedelta(seconds=int(expires_in)-600)).__str__()}
+    user_data[username] = {"display_name": display_name, "images": images, "access_token": access_token, "refresh_token": refresh_token, "expires": (datetime.now() + timedelta(seconds=int(expires_in)-600)).__str__()}
     with open('./user_data/user_data.json', 'w') as data_file:
         json.dump(user_data, data_file)
     return Response(status=201)
@@ -62,7 +68,7 @@ def get_stored_tokens():
     username = request.args['username']
     with open('./user_data/user_data.json', 'r') as data_file:
         user_data = json.load(data_file)
-    return jsonify(images=user_data[username]['images'], access_token=user_data[username]['access_token'], refresh_token=user_data[username]['refresh_token'], expires=user_data[username]['expires'])
+    return jsonify(display_name=user_data[username]["display_name"], images=user_data[username]['images'], access_token=user_data[username]['access_token'], refresh_token=user_data[username]['refresh_token'], expires=user_data[username]['expires'])
 
 
 def refresh_user_token():
