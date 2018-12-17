@@ -62,10 +62,9 @@ def handle_user_connect(display_name, sid):
             connected_users = json.load(connected_file)
             if len(connected_users) > 5:
                 connected_users['users'][0] = {'display_name': display_name["display_name"], 'sid': sid['sid']}
-                socketio.emit('list_users', connected_users)
             else:
-                socketio.emit('list_users', connected_users)
                 connected_users['users'].append({'display_name': display_name["display_name"], 'sid': sid['sid']})
+            socketio.emit('list_users', connected_users)
         except ValueError:
             connected_users = {'users': [{'display_name': display_name["display_name"], 'sid': sid['sid']}]}
     with open("./user_data/connected_users.json", "w") as connected_file:
@@ -82,6 +81,7 @@ def handle_user_disconnect():
     for i in range(len(connected_users['users'])):
         if connected_users['users'][i]['sid'] == user_sid:
             connected_users['users'].pop(i)
+            break
     with open("./user_data/connected_users.json", "w") as connected_file:
         json.dump(connected_users, connected_file)
         socketio.emit('user_disconnected', connected_users, broadcast=True, include_self=False)
