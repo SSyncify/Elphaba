@@ -1,10 +1,13 @@
-from flask import request, redirect
+from flask import request
 from flask import jsonify
 from flask import Response
 from base64 import b64encode
-from datetime import datetime, timedelta
 import requests as api_request
-import json
+import pymysql
+
+db = pymysql.connect("localhost", "root", "496545Aa", "Accounts")
+db_cursor = db.cursor()
+
 
 
 CLIENT_ID = "d68e3b6c4ff5431ab1d5bc7808d1ec0b"
@@ -43,43 +46,29 @@ def get_user_info_from_spotify():
 
 
 def store_tokens():
-    username = request.args['username']
     access_token = request.args['access_token']
     refresh_token = request.args['refresh_token']
     expires_in = request.args['expiry_time']
     images = request.args['images']
     display_name = request.args['display_name']
-    with open('./user_data/user_data.json', 'r') as data_file:
-        try:
-            user_data = json.load(data_file)
-        except ValueError:
-            user_data = {}
 
-    if len(user_data) > 5:
-        user_data.pop(user_data.keys[0])
-
-    user_data[username] = {"display_name": display_name, "images": images, "access_token": access_token, "refresh_token": refresh_token, "expires": (datetime.now() + timedelta(seconds=int(expires_in)-600)).__str__()}
-    with open('./user_data/user_data.json', 'w') as data_file:
-        json.dump(user_data, data_file)
+    print(len(refresh_token))
+    prepared_stmt = "INSERT INTO users (uid, display_name, expiry, access_token, profile_image) VALUES (%s, %s, %s, %s, %s)"
+    db_cursor.execute(prepared_stmt, (refresh_token, display_name, expires_in, access_token, images))
     return Response(status=201)
 
 
 def get_stored_tokens():
-    username = request.args['username']
-    with open('./user_data/user_data.json', 'r') as data_file:
-        user_data = json.load(data_file)
-    return jsonify(display_name=user_data[username]["display_name"], images=user_data[username]['images'], access_token=user_data[username]['access_token'], refresh_token=user_data[username]['refresh_token'], expires=user_data[username]['expires'])
+    uid = request.args['uid']
+    prepared_stmt = "SELECT * FROM users WHERE uid=%s"
+    db_cursor.execute(prepared_stmt, uid)
+    data = db_cursor.fetchall()
+    Response(200)
+    return jsonify(display_name=data[1], images=data[4], refresh_token=data[0], access_token=data[3], expires=data[2])
 
 
 def refresh_user_token():
-    username = request.headers['username']
     refresh_token = request.args['refresh_token']
-
-    with open('./user_data/user_data.json', 'r') as data_file:
-        try:
-            user_data = json.load(data_file)
-        except ValueError:
-            return Response('no user data stored', status=400)
 
     code_payload = {
         "grant_type": "refresh_token",
@@ -92,9 +81,6 @@ def refresh_user_token():
     new_access_token = response['access_token']
     expires_in = response['expires_in']
 
-    user_data[username]['access_token'] = new_access_token
-    user_data[username]['expires'] = (datetime.now() + timedelta(seconds=int(expires_in)-600)).__str__()
-
-    with open('./user_data/user_data.json', 'w') as data_file:
-        json.dump(user_data, data_file)
+    prepared_stmt = "UPDATE users SET access_token=%s, expiry=%s WHERE uid=%s"
+    db_cursor.execute(prepared_stmt, (new_access_token, expires_in, refresh_token))
     return Response(status=201)

@@ -53,10 +53,13 @@ def refresh_stored_token():
     return authentication_controllers.refresh_user_token()
 
 
+
+
+# Socket Event Handlers
+
 @socketio.on("user_connected")
 def handle_user_connect(display_name, sid):
     print("USER CONNECTED")
-    print(sid)
     with open("./user_data/connected_users.json", "r") as connected_file:
         try:
             connected_users = json.load(connected_file)
