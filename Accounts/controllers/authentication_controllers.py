@@ -9,8 +9,8 @@ db = pymysql.connect("localhost", "root", "496545Aa", "Accounts")
 db_cursor = db.cursor()
 
 
-CLIENT_ID = "d68e3b6c4ff5431ab1d5bc7808d1ec0b"
-CLIENT_SECRET = "c7d41cb2f1424ac88f0bccdde873e7b2"
+CLIENT_ID = "cb00645fb09c42b7b68431b639091bcf"
+CLIENT_SECRET = "4b1b65c712af4a9ebfd26485bec2a078"
 SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token"
 SPOTIFY_AUTHORIZATION_URL = "https://accounts.spotify.com/authorize"
 REDIRECT_URI = 'http://127.0.0.1:3000/callback/redirect'
