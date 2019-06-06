@@ -9,7 +9,6 @@ db = pymysql.connect("localhost", "root", "496545Aa", "Accounts")
 db_cursor = db.cursor()
 
 
-
 CLIENT_ID = "d68e3b6c4ff5431ab1d5bc7808d1ec0b"
 CLIENT_SECRET = "c7d41cb2f1424ac88f0bccdde873e7b2"
 SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token"
@@ -52,7 +51,6 @@ def store_tokens():
     images = request.args['images']
     display_name = request.args['display_name']
 
-    print(len(refresh_token))
     prepared_stmt = "INSERT INTO users (uid, display_name, expiry, access_token, profile_image) VALUES (%s, %s, %s, %s, %s)"
     db_cursor.execute(prepared_stmt, (refresh_token, display_name, expires_in, access_token, images))
     return Response(status=201)
